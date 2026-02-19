@@ -1166,4 +1166,3 @@ of this software and associated documentation files...
   <br>
   <sub>© 2026 Коваль. Все права защищены.</sub>
 </p>
-```
