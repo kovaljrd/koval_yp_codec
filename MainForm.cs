@@ -9,41 +9,41 @@ namespace koval_yp_codec
     public partial class MainForm : Form
     {
         // Панели
-        private Panel menuPanel;
-        private Panel encryptPanel;
-        private Panel signaturePanel;
-        private Panel historyPanel;
-        private Panel logPanel;
+        private Panel _menuPanel;
+        private Panel _encryptPanel;
+        private Panel _signaturePanel;
+        private Panel _historyPanel;
+        private Panel _logPanel;
 
         // Элементы главного меню
-        private Button btnEncryptMenu, btnSignatureMenu, btnHistoryMenu, btnLogMenu;
-        private ToolTip toolTip;
+        private Button _btnEncryptMenu, _btnSignatureMenu, _btnHistoryMenu, _btnLogMenu;
+        private ToolTip _toolTip;
 
         // Элементы шифрования
-        private ComboBox cmbCipher;
-        private NumericUpDown nudShift;
-        private TextBox txtInput, txtOutput;
-        private Button btnEncrypt, btnDecrypt, btnRecognize, btnBackFromEncrypt;
-        private Label lblShift, lblCipher;
+        private ComboBox _cmbCipher;
+        private NumericUpDown _nudShift;
+        private TextBox _txtInput, _txtOutput;
+        private Button _btnEncrypt, _btnDecrypt, _btnRecognize, _btnBackFromEncrypt;
+        private Label _lblShift, _lblCipher;
         private const int MAX_TEXT_LENGTH = 10000;
 
         // Элементы подписи
-        private TextBox txtSignInput, txtSignature, txtVerifyInput, txtVerifySig;
-        private Button btnSign, btnVerify, btnBackFromSignature;
-        private Label lblVerifyResult;
+        private TextBox _txtSignInput, _txtSignature, _txtVerifyInput, _txtVerifySig;
+        private Button _btnSign, _btnVerify, _btnBackFromSignature;
+        private Label _lblVerifyResult;
 
         // Элементы истории
-        private ListBox lstHistory;
-        private Button btnBackFromHistory;
+        private ListBox _lstHistory;
+        private Button _btnBackFromHistory;
 
         // Элементы логов
-        private TextBox txtLog;
-        private Button btnRefreshLog, btnBackFromLog;
+        private TextBox _txtLog;
+        private Button _btnRefreshLog, _btnBackFromLog;
 
         // Трей и хоткей
-        private NotifyIcon trayIcon;
-        private ContextMenuStrip trayMenu;
-        private bool isTrayMode = false;
+        private NotifyIcon _trayIcon;
+        private ContextMenuStrip _trayMenu;
+        private bool _isTrayMode = false;
 
         public MainForm()
         {
@@ -99,17 +99,17 @@ namespace koval_yp_codec
             catch { /* если нет фона - используем цвет */ }
         }
 
-        // ---------- Инициализация подсказок (BUG-008) ----------
+        // ---------- Инициализация подсказок ----------
         private void InitializeToolTips()
         {
-            toolTip = new ToolTip();
-            toolTip.SetToolTip(btnEncryptMenu, "Перейти к шифрованию текста");
-            toolTip.SetToolTip(btnSignatureMenu, "Создать или проверить цифровую подпись");
-            toolTip.SetToolTip(btnHistoryMenu, "Просмотреть историю операций шифрования");
-            toolTip.SetToolTip(btnLogMenu, "Просмотреть журнал всех действий");
+            _toolTip = new ToolTip();
+            _toolTip.SetToolTip(_btnEncryptMenu, "Перейти к шифрованию текста");
+            _toolTip.SetToolTip(_btnSignatureMenu, "Создать или проверить цифровую подпись");
+            _toolTip.SetToolTip(_btnHistoryMenu, "Просмотреть историю операций шифрования");
+            _toolTip.SetToolTip(_btnLogMenu, "Просмотреть журнал всех действий");
         }
 
-        // ---------- Сохранение соотношения сторон (BUG-003) ----------
+        // ---------- Сохранение соотношения сторон ----------
         private void MainForm_Resize(object sender, EventArgs e)
         {
             if (this.WindowState != FormWindowState.Normal) return;
@@ -133,52 +133,52 @@ namespace koval_yp_codec
         // ---------- Навигация ----------
         private void ShowMenu()
         {
-            menuPanel.Visible = true;
-            encryptPanel.Visible = false;
-            signaturePanel.Visible = false;
-            historyPanel.Visible = false;
-            logPanel.Visible = false;
+            _menuPanel.Visible = true;
+            _encryptPanel.Visible = false;
+            _signaturePanel.Visible = false;
+            _historyPanel.Visible = false;
+            _logPanel.Visible = false;
             this.Text = "Змеиный кодек — Главное меню";
         }
 
         private void ShowEncrypt()
         {
-            menuPanel.Visible = false;
-            encryptPanel.Visible = true;
-            signaturePanel.Visible = false;
-            historyPanel.Visible = false;
-            logPanel.Visible = false;
+            _menuPanel.Visible = false;
+            _encryptPanel.Visible = true;
+            _signaturePanel.Visible = false;
+            _historyPanel.Visible = false;
+            _logPanel.Visible = false;
             this.Text = "Змеиный кодек — Шифрование";
         }
 
         private void ShowSignature()
         {
-            menuPanel.Visible = false;
-            encryptPanel.Visible = false;
-            signaturePanel.Visible = true;
-            historyPanel.Visible = false;
-            logPanel.Visible = false;
+            _menuPanel.Visible = false;
+            _encryptPanel.Visible = false;
+            _signaturePanel.Visible = true;
+            _historyPanel.Visible = false;
+            _logPanel.Visible = false;
             this.Text = "Змеиный кодек — Подпись";
         }
 
         private void ShowHistory()
         {
-            menuPanel.Visible = false;
-            encryptPanel.Visible = false;
-            signaturePanel.Visible = false;
-            historyPanel.Visible = true;
-            logPanel.Visible = false;
+            _menuPanel.Visible = false;
+            _encryptPanel.Visible = false;
+            _signaturePanel.Visible = false;
+            _historyPanel.Visible = true;
+            _logPanel.Visible = false;
             LoadHistory(); // обновляем перед показом
             this.Text = "Змеиный кодек — История операций";
         }
 
         private void ShowLog()
         {
-            menuPanel.Visible = false;
-            encryptPanel.Visible = false;
-            signaturePanel.Visible = false;
-            historyPanel.Visible = false;
-            logPanel.Visible = true;
+            _menuPanel.Visible = false;
+            _encryptPanel.Visible = false;
+            _signaturePanel.Visible = false;
+            _historyPanel.Visible = false;
+            _logPanel.Visible = true;
             LoadLog(); // обновляем перед показом
             this.Text = "Змеиный кодек — Журнал";
         }
@@ -186,7 +186,7 @@ namespace koval_yp_codec
         // ---------- Создание панелей ----------
         private void CreateMenuPanel()
         {
-            menuPanel = new Panel
+            _menuPanel = new Panel
             {
                 Size = new Size(400, 300),
                 Location = new Point((this.ClientSize.Width - 400) / 2, (this.ClientSize.Height - 300) / 2),
@@ -194,20 +194,20 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.None
             };
 
-            btnEncryptMenu = CreateMenuButton("ШИФРОВАНИЕ", new Point(0, 0));
-            btnEncryptMenu.Click += (s, e) => ShowEncrypt();
+            _btnEncryptMenu = CreateMenuButton("ШИФРОВАНИЕ", new Point(0, 0));
+            _btnEncryptMenu.Click += (s, e) => ShowEncrypt();
 
-            btnSignatureMenu = CreateMenuButton("ПОДПИСЬ", new Point(0, 60));
-            btnSignatureMenu.Click += (s, e) => ShowSignature();
+            _btnSignatureMenu = CreateMenuButton("ПОДПИСЬ", new Point(0, 60));
+            _btnSignatureMenu.Click += (s, e) => ShowSignature();
 
-            btnHistoryMenu = CreateMenuButton("ИСТОРИЯ", new Point(0, 120));
-            btnHistoryMenu.Click += (s, e) => ShowHistory();
+            _btnHistoryMenu = CreateMenuButton("ИСТОРИЯ", new Point(0, 120));
+            _btnHistoryMenu.Click += (s, e) => ShowHistory();
 
-            btnLogMenu = CreateMenuButton("ЖУРНАЛ", new Point(0, 180));
-            btnLogMenu.Click += (s, e) => ShowLog();
+            _btnLogMenu = CreateMenuButton("ЖУРНАЛ", new Point(0, 180));
+            _btnLogMenu.Click += (s, e) => ShowLog();
 
-            menuPanel.Controls.AddRange(new Control[] { btnEncryptMenu, btnSignatureMenu, btnHistoryMenu, btnLogMenu });
-            this.Controls.Add(menuPanel);
+            _menuPanel.Controls.AddRange(new Control[] { _btnEncryptMenu, _btnSignatureMenu, _btnHistoryMenu, _btnLogMenu });
+            this.Controls.Add(_menuPanel);
         }
 
         private Button CreateMenuButton(string text, Point location)
@@ -238,7 +238,7 @@ namespace koval_yp_codec
 
         private void CreateEncryptPanel()
         {
-            encryptPanel = new Panel
+            _encryptPanel = new Panel
             {
                 Size = this.ClientSize,
                 Location = new Point(0, 0),
@@ -246,15 +246,15 @@ namespace koval_yp_codec
                 Visible = false,
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
-            encryptPanel.Resize += EncryptPanel_Resize;
+            _encryptPanel.Resize += EncryptPanel_Resize;
 
             // Кнопка Назад с возможной иконкой
-            btnBackFromEncrypt = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
-            btnBackFromEncrypt.Click += (s, e) => ShowMenu();
-            encryptPanel.Controls.Add(btnBackFromEncrypt);
+            _btnBackFromEncrypt = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
+            _btnBackFromEncrypt.Click += (s, e) => ShowMenu();
+            _encryptPanel.Controls.Add(_btnBackFromEncrypt);
 
             // Выбор шифра
-            lblCipher = new Label
+            _lblCipher = new Label
             {
                 Text = "Шифр:",
                 Location = new Point(20, 60),
@@ -263,7 +263,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            cmbCipher = new ComboBox
+            _cmbCipher = new ComboBox
             {
                 Location = new Point(110, 60),
                 Size = new Size(150, 25),
@@ -272,12 +272,12 @@ namespace koval_yp_codec
                 ForeColor = Color.FromArgb(184, 217, 166),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
-            cmbCipher.Items.AddRange(new[] { "Цезарь", "ROT-n", "Азбука Морзе", "Двоичный код", "A1Z26", "Base32", "Base64", "ASCII" });
-            cmbCipher.SelectedIndex = 1;
-            cmbCipher.SelectedIndexChanged += CmbCipher_SelectedIndexChanged;
+            _cmbCipher.Items.AddRange(new[] { "Цезарь", "ROT-n", "Азбука Морзе", "Двоичный код", "A1Z26", "Base32", "Base64", "ASCII" });
+            _cmbCipher.SelectedIndex = 1;
+            _cmbCipher.SelectedIndexChanged += CmbCipher_SelectedIndexChanged;
 
             // Сдвиг (изначально виден, но скроется, если не нужен)
-            lblShift = new Label
+            _lblShift = new Label
             {
                 Text = "Сдвиг:",
                 Location = new Point(280, 60),
@@ -286,7 +286,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            nudShift = new NumericUpDown
+            _nudShift = new NumericUpDown
             {
                 Location = new Point(350, 60),
                 Size = new Size(60, 25),
@@ -308,7 +308,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtInput = new TextBox
+            _txtInput = new TextBox
             {
                 Location = new Point(110, 100),
                 Size = new Size(this.ClientSize.Width - 130, 100),
@@ -319,7 +319,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            // Поле вывода с исправленным масштабированием (BUG-004)
+            // Поле вывода
             var lblOutput = new Label
             {
                 Text = "Вывод:",
@@ -329,7 +329,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtOutput = new TextBox
+            _txtOutput = new TextBox
             {
                 Location = new Point(110, 210),
                 Size = new Size(this.ClientSize.Width - 130, this.ClientSize.Height - 320),
@@ -342,25 +342,25 @@ namespace koval_yp_codec
             };
 
             // Кнопки действий
-            btnEncrypt = CreateStyledButton("ЗАШИФРОВАТЬ", 110, this.ClientSize.Height - 90, 120, 30, "encrypt.png");
-            btnEncrypt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnEncrypt.Click += BtnEncrypt_Click;
+            _btnEncrypt = CreateStyledButton("ЗАШИФРОВАТЬ", 110, this.ClientSize.Height - 90, 120, 30, "encrypt.png");
+            _btnEncrypt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnEncrypt.Click += BtnEncrypt_Click;
 
-            btnDecrypt = CreateStyledButton("ДЕШИФРОВАТЬ", 240, this.ClientSize.Height - 90, 120, 30, "decrypt.png");
-            btnDecrypt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnDecrypt.Click += BtnDecrypt_Click;
+            _btnDecrypt = CreateStyledButton("ДЕШИФРОВАТЬ", 240, this.ClientSize.Height - 90, 120, 30, "decrypt.png");
+            _btnDecrypt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnDecrypt.Click += BtnDecrypt_Click;
 
-            btnRecognize = CreateStyledButton("РАСПОЗНАТЬ", 370, this.ClientSize.Height - 90, 120, 30, "recognize.png");
-            btnRecognize.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnRecognize.Click += BtnRecognize_Click;
+            _btnRecognize = CreateStyledButton("РАСПОЗНАТЬ", 370, this.ClientSize.Height - 90, 120, 30, "recognize.png");
+            _btnRecognize.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnRecognize.Click += BtnRecognize_Click;
 
-            encryptPanel.Controls.AddRange(new Control[] {
-                lblCipher, cmbCipher, lblShift, nudShift,
-                lblInput, txtInput, lblOutput, txtOutput,
-                btnEncrypt, btnDecrypt, btnRecognize, btnBackFromEncrypt
+            _encryptPanel.Controls.AddRange(new Control[] {
+                _lblCipher, _cmbCipher, _lblShift, _nudShift,
+                lblInput, _txtInput, lblOutput, _txtOutput,
+                _btnEncrypt, _btnDecrypt, _btnRecognize, _btnBackFromEncrypt
             });
 
-            this.Controls.Add(encryptPanel);
+            this.Controls.Add(_encryptPanel);
 
             // Устанавливаем начальную видимость сдвига
             UpdateShiftVisibility();
@@ -368,23 +368,23 @@ namespace koval_yp_codec
 
         private void EncryptPanel_Resize(object sender, EventArgs e)
         {
-            if (txtOutput != null && btnEncrypt != null)
+            if (_txtOutput != null && _btnEncrypt != null)
             {
                 // Пересчитываем положение кнопок при изменении размера
-                btnEncrypt.Top = encryptPanel.Height - 60;
-                btnDecrypt.Top = encryptPanel.Height - 60;
-                btnRecognize.Top = encryptPanel.Height - 60;
+                _btnEncrypt.Top = _encryptPanel.Height - 60;
+                _btnDecrypt.Top = _encryptPanel.Height - 60;
+                _btnRecognize.Top = _encryptPanel.Height - 60;
 
                 // Пересчитываем высоту поля вывода
-                txtOutput.Height = encryptPanel.Height - 320;
-                txtOutput.Width = encryptPanel.Width - 130;
-                txtInput.Width = encryptPanel.Width - 130;
+                _txtOutput.Height = _encryptPanel.Height - 320;
+                _txtOutput.Width = _encryptPanel.Width - 130;
+                _txtInput.Width = _encryptPanel.Width - 130;
             }
         }
 
         private void CreateSignaturePanel()
         {
-            signaturePanel = new Panel
+            _signaturePanel = new Panel
             {
                 Size = this.ClientSize,
                 Location = new Point(0, 0),
@@ -393,9 +393,9 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            btnBackFromSignature = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
-            btnBackFromSignature.Click += (s, e) => ShowMenu();
-            signaturePanel.Controls.Add(btnBackFromSignature);
+            _btnBackFromSignature = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
+            _btnBackFromSignature.Click += (s, e) => ShowMenu();
+            _signaturePanel.Controls.Add(_btnBackFromSignature);
 
             // Подписание
             var lblSignInput = new Label
@@ -407,7 +407,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtSignInput = new TextBox
+            _txtSignInput = new TextBox
             {
                 Location = new Point(180, 60),
                 Size = new Size(this.ClientSize.Width - 200, 60),
@@ -417,9 +417,9 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            btnSign = CreateStyledButton("ПОДПИСАТЬ", 180, 130, 120, 30, "sign.png");
-            btnSign.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            btnSign.Click += BtnSign_Click;
+            _btnSign = CreateStyledButton("ПОДПИСАТЬ", 180, 130, 120, 30, "sign.png");
+            _btnSign.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            _btnSign.Click += BtnSign_Click;
 
             var lblSignature = new Label
             {
@@ -430,7 +430,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtSignature = new TextBox
+            _txtSignature = new TextBox
             {
                 Location = new Point(110, 170),
                 Size = new Size(this.ClientSize.Width - 130, 25),
@@ -450,7 +450,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtVerifyInput = new TextBox
+            _txtVerifyInput = new TextBox
             {
                 Location = new Point(180, 210),
                 Size = new Size(this.ClientSize.Width - 200, 60),
@@ -469,7 +469,7 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            txtVerifySig = new TextBox
+            _txtVerifySig = new TextBox
             {
                 Location = new Point(110, 280),
                 Size = new Size(300, 25),
@@ -478,11 +478,11 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            btnVerify = CreateStyledButton("ПРОВЕРИТЬ", 420, 280, 100, 25, "verify.png");
-            btnVerify.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            btnVerify.Click += BtnVerify_Click;
+            _btnVerify = CreateStyledButton("ПРОВЕРИТЬ", 420, 280, 100, 25, "verify.png");
+            _btnVerify.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            _btnVerify.Click += BtnVerify_Click;
 
-            lblVerifyResult = new Label
+            _lblVerifyResult = new Label
             {
                 Location = new Point(110, 310),
                 Size = new Size(300, 25),
@@ -490,18 +490,18 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
 
-            signaturePanel.Controls.AddRange(new Control[] {
-                lblSignInput, txtSignInput, btnSign, lblSignature, txtSignature,
-                lblVerifyInput, txtVerifyInput, lblVerifySig, txtVerifySig,
-                btnVerify, lblVerifyResult, btnBackFromSignature
+            _signaturePanel.Controls.AddRange(new Control[] {
+                lblSignInput, _txtSignInput, _btnSign, lblSignature, _txtSignature,
+                lblVerifyInput, _txtVerifyInput, lblVerifySig, _txtVerifySig,
+                _btnVerify, _lblVerifyResult, _btnBackFromSignature
             });
 
-            this.Controls.Add(signaturePanel);
+            this.Controls.Add(_signaturePanel);
         }
 
         private void CreateHistoryPanel()
         {
-            historyPanel = new Panel
+            _historyPanel = new Panel
             {
                 Size = this.ClientSize,
                 Location = new Point(0, 0),
@@ -510,11 +510,11 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            btnBackFromHistory = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
-            btnBackFromHistory.Click += (s, e) => ShowMenu();
-            historyPanel.Controls.Add(btnBackFromHistory);
+            _btnBackFromHistory = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
+            _btnBackFromHistory.Click += (s, e) => ShowMenu();
+            _historyPanel.Controls.Add(_btnBackFromHistory);
 
-            lstHistory = new ListBox
+            _lstHistory = new ListBox
             {
                 Location = new Point(20, 50),
                 Size = new Size(this.ClientSize.Width - 40, this.ClientSize.Height - 80),
@@ -522,13 +522,13 @@ namespace koval_yp_codec
                 ForeColor = Color.FromArgb(184, 217, 166),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
-            historyPanel.Controls.Add(lstHistory);
-            this.Controls.Add(historyPanel);
+            _historyPanel.Controls.Add(_lstHistory);
+            this.Controls.Add(_historyPanel);
         }
 
         private void CreateLogPanel()
         {
-            logPanel = new Panel
+            _logPanel = new Panel
             {
                 Size = this.ClientSize,
                 Location = new Point(0, 0),
@@ -537,11 +537,11 @@ namespace koval_yp_codec
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            btnBackFromLog = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
-            btnBackFromLog.Click += (s, e) => ShowMenu();
-            logPanel.Controls.Add(btnBackFromLog);
+            _btnBackFromLog = CreateStyledButton("← НАЗАД", 10, 10, 100, 30, "back_arrow.png");
+            _btnBackFromLog.Click += (s, e) => ShowMenu();
+            _logPanel.Controls.Add(_btnBackFromLog);
 
-            txtLog = new TextBox
+            _txtLog = new TextBox
             {
                 Location = new Point(20, 50),
                 Size = new Size(this.ClientSize.Width - 40, this.ClientSize.Height - 100),
@@ -552,14 +552,14 @@ namespace koval_yp_codec
                 ForeColor = Color.FromArgb(184, 217, 166),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
-            logPanel.Controls.Add(txtLog);
+            _logPanel.Controls.Add(_txtLog);
 
-            btnRefreshLog = CreateStyledButton("ОБНОВИТЬ", 20, this.ClientSize.Height - 40, 120, 30, "refresh.png");
-            btnRefreshLog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnRefreshLog.Click += (s, e) => LoadLog();
-            logPanel.Controls.Add(btnRefreshLog);
+            _btnRefreshLog = CreateStyledButton("ОБНОВИТЬ", 20, this.ClientSize.Height - 40, 120, 30, "refresh.png");
+            _btnRefreshLog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _btnRefreshLog.Click += (s, e) => LoadLog();
+            _logPanel.Controls.Add(_btnRefreshLog);
 
-            this.Controls.Add(logPanel);
+            this.Controls.Add(_logPanel);
         }
 
         // Вспомогательный метод для создания кнопок с иконками
@@ -612,16 +612,16 @@ namespace koval_yp_codec
 
         private void UpdateShiftVisibility()
         {
-            string selected = cmbCipher.SelectedItem.ToString();
+            string selected = _cmbCipher.SelectedItem.ToString();
             bool showShift = selected == "Цезарь" || selected == "ROT-n";
 
-            if (lblShift != null)
-                lblShift.Visible = showShift;
-            if (nudShift != null)
-                nudShift.Visible = showShift;
+            if (_lblShift != null)
+                _lblShift.Visible = showShift;
+            if (_nudShift != null)
+                _nudShift.Visible = showShift;
         }
 
-        // ---------- Проверка на пустые поля (BUG-011) ----------
+        // ---------- Проверка на пустые поля ----------
         private bool ValidateInput(string input, string operationName)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -631,7 +631,7 @@ namespace koval_yp_codec
                 return false;
             }
 
-            // Проверка на максимальную длину (BUG-006)
+            // Проверка на максимальную длину
             if (input.Length > MAX_TEXT_LENGTH)
             {
                 MessageBox.Show($"Текст слишком длинный. Максимальная длина: {MAX_TEXT_LENGTH} символов.",
@@ -642,32 +642,48 @@ namespace koval_yp_codec
             return true;
         }
 
-        // ---------- Логика шифрования ----------
+        // ---------- Логика шифрования (ИСПРАВЛЕНО) ----------
         private void BtnEncrypt_Click(object sender, EventArgs e)
         {
-            string text = txtInput.Text;
+            string text = _txtInput.Text;
 
-            // Проверка на пустые поля (BUG-011)
+            // Проверка на пустые поля
             if (!ValidateInput(text, "шифрования")) return;
 
-            string cipher = cmbCipher.SelectedItem.ToString();
-            int shift = (int)nudShift.Value;
+            string cipher = _cmbCipher.SelectedItem.ToString();
+            int shift = (int)_nudShift.Value;
             string result = "";
 
             try
             {
                 switch (cipher)
                 {
-                    case "Цезарь": result = Ciphers.Caesar(text, shift, true); break;
-                    case "ROT-n": result = Ciphers.Rot(text, shift, true); break;
-                    case "Азбука Морзе": result = Ciphers.MorseEncode(text); break;
-                    case "Двоичный код": result = Ciphers.BinaryEncode(text); break;
-                    case "A1Z26": result = Ciphers.A1Z26Encode(text); break;
-                    case "Base32": result = Ciphers.Base32Encode(text); break;
-                    case "Base64": result = Ciphers.Base64Encode(text); break;
-                    case "ASCII": result = Ciphers.AsciiEncode(text); break;
+                    case "Цезарь":
+                        result = Ciphers.Caesar(text, shift, true);
+                        break;
+                    case "ROT-n":
+                        result = Ciphers.Rot(text, shift, true); // true = шифрование
+                        break;
+                    case "Азбука Морзе":
+                        result = Ciphers.MorseEncode(text);
+                        break;
+                    case "Двоичный код":
+                        result = Ciphers.BinaryEncode(text);
+                        break;
+                    case "A1Z26":
+                        result = Ciphers.A1Z26Encode(text);
+                        break;
+                    case "Base32":
+                        result = Ciphers.Base32Encode(text);
+                        break;
+                    case "Base64":
+                        result = Ciphers.Base64Encode(text);
+                        break;
+                    case "ASCII":
+                        result = Ciphers.AsciiEncode(text);
+                        break;
                 }
-                txtOutput.Text = result;
+                _txtOutput.Text = result;
                 Logger.Log("ENCRYPT", $"{cipher}: {Truncate(text)}");
                 RadioHistory.AddEntry("ENCRYPT", cipher, text);
             }
@@ -677,37 +693,54 @@ namespace koval_yp_codec
             }
         }
 
+        // ---------- Логика дешифрования (ИСПРАВЛЕНО) ----------
         private void BtnDecrypt_Click(object sender, EventArgs e)
         {
-            string text = txtInput.Text;
+            string text = _txtInput.Text;
 
-            // Проверка на пустые поля (BUG-011)
+            // Проверка на пустые поля
             if (!ValidateInput(text, "дешифрования")) return;
 
-            string cipher = cmbCipher.SelectedItem.ToString();
-            int shift = (int)nudShift.Value;
+            string cipher = _cmbCipher.SelectedItem.ToString();
+            int shift = (int)_nudShift.Value;
             string result = "";
 
             try
             {
                 switch (cipher)
                 {
-                    case "Цезарь": result = Ciphers.Caesar(text, shift, false); break;
-                    case "ROT-n": result = Ciphers.Rot(text, shift, false); break;
-                    case "Азбука Морзе": result = Ciphers.MorseDecode(text); break;
-                    case "Двоичный код": result = Ciphers.BinaryDecode(text); break;
-                    case "A1Z26": result = Ciphers.A1Z26Decode(text); break;
-                    case "Base32": result = Ciphers.Base32Decode(text); break;
-                    case "Base64": result = Ciphers.Base64Decode(text); break;
-                    case "ASCII": result = Ciphers.AsciiDecode(text); break;
+                    case "Цезарь":
+                        result = Ciphers.Caesar(text, shift, false);
+                        break;
+                    case "ROT-n":
+                        result = Ciphers.Rot(text, shift, false); // false = дешифрование
+                        break;
+                    case "Азбука Морзе":
+                        result = Ciphers.MorseDecode(text);
+                        break;
+                    case "Двоичный код":
+                        result = Ciphers.BinaryDecode(text);
+                        break;
+                    case "A1Z26":
+                        result = Ciphers.A1Z26Decode(text);
+                        break;
+                    case "Base32":
+                        result = Ciphers.Base32Decode(text);
+                        break;
+                    case "Base64":
+                        result = Ciphers.Base64Decode(text);
+                        break;
+                    case "ASCII":
+                        result = Ciphers.AsciiDecode(text);
+                        break;
                 }
-                txtOutput.Text = result;
+                _txtOutput.Text = result;
                 Logger.Log("DECRYPT", $"{cipher}: {Truncate(text)}");
                 RadioHistory.AddEntry("DECRYPT", cipher, text);
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
-                MessageBox.Show("Ошибка формата: введённый текст не соответствует выбранному шифру.",
+                MessageBox.Show("Ошибка формата: " + ex.Message,
                                 "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
@@ -718,9 +751,9 @@ namespace koval_yp_codec
 
         private void BtnRecognize_Click(object sender, EventArgs e)
         {
-            string text = txtInput.Text;
+            string text = _txtInput.Text;
 
-            // Проверка на пустые поля (BUG-011)
+            // Проверка на пустые поля
             if (!ValidateInput(text, "распознавания")) return;
 
             string guess = "Не удалось определить";
@@ -744,23 +777,23 @@ namespace koval_yp_codec
         // ---------- Подпись ----------
         private void BtnSign_Click(object sender, EventArgs e)
         {
-            string text = txtSignInput.Text;
+            string text = _txtSignInput.Text;
 
-            // Проверка на пустые поля (BUG-011)
+            // Проверка на пустые поля
             if (!ValidateInput(text, "подписи")) return;
 
             string sig = Signature.SignText(text);
-            txtSignature.Text = sig;
+            _txtSignature.Text = sig;
             Logger.Log("SIGN", Truncate(text));
             RadioHistory.AddEntry("SIGN", "Signature", text);
         }
 
         private void BtnVerify_Click(object sender, EventArgs e)
         {
-            string text = txtVerifyInput.Text;
-            string sig = txtVerifySig.Text;
+            string text = _txtVerifyInput.Text;
+            string sig = _txtVerifySig.Text;
 
-            // Проверка на пустые поля (BUG-011)
+            // Проверка на пустые поля
             if (string.IsNullOrWhiteSpace(text))
             {
                 MessageBox.Show("Введите текст для проверки", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -774,15 +807,15 @@ namespace koval_yp_codec
             }
 
             bool ok = Signature.VerifySignature(text, sig);
-            lblVerifyResult.Text = ok ? "✓ Подпись верна" : "✗ Подпись недействительна";
-            lblVerifyResult.ForeColor = ok ? Color.FromArgb(184, 217, 166) : Color.Red;
+            _lblVerifyResult.Text = ok ? "✓ Подпись верна" : "✗ Подпись недействительна";
+            _lblVerifyResult.ForeColor = ok ? Color.FromArgb(184, 217, 166) : Color.Red;
         }
 
-        // ---------- История и логи (BUG-005) ----------
+        // ---------- История и логи ----------
         private void LoadHistory()
         {
-            if (lstHistory == null) return;
-            lstHistory.Items.Clear();
+            if (_lstHistory == null) return;
+            _lstHistory.Items.Clear();
 
             // Фильтруем только операции шифрования и дешифрования
             var historyEntries = RadioHistory.GetAll()
@@ -790,14 +823,14 @@ namespace koval_yp_codec
 
             foreach (var entry in historyEntries)
             {
-                lstHistory.Items.Add($"{entry.Frequency:F2} MHz | {entry.OperationType} | {entry.CipherName} | {entry.Preview} [{entry.Timestamp:HH:mm:ss}]");
+                _lstHistory.Items.Add($"{entry.Frequency:F2} MHz | {entry.OperationType} | {entry.CipherName} | {entry.Preview} [{entry.Timestamp:HH:mm:ss}]");
             }
         }
 
         private void LoadLog()
         {
-            if (txtLog == null) return;
-            txtLog.Text = Logger.GetLogs(100);
+            if (_txtLog == null) return;
+            _txtLog.Text = Logger.GetLogs(100);
         }
 
         private string Truncate(string s, int maxLen = 30)
@@ -807,10 +840,10 @@ namespace koval_yp_codec
             return s.Substring(0, maxLen) + "...";
         }
 
-        // ---------- Трей (BUG-009, BUG-010) ----------
+        // ---------- Трей ----------
         private void SetupTray()
         {
-            trayIcon = new NotifyIcon
+            _trayIcon = new NotifyIcon
             {
                 Icon = SystemIcons.Application,
                 Text = "Змеиный кодек",
@@ -818,7 +851,7 @@ namespace koval_yp_codec
             };
 
             // Создаём контекстное меню для трея
-            trayMenu = new ContextMenuStrip();
+            _trayMenu = new ContextMenuStrip();
 
             var showMenuItem = new ToolStripMenuItem("Показать окно");
             showMenuItem.Click += (s, e) => ShowFromTray();
@@ -826,16 +859,16 @@ namespace koval_yp_codec
             var exitMenuItem = new ToolStripMenuItem("Выход");
             exitMenuItem.Click += (s, e) =>
             {
-                trayIcon.Visible = false;
+                _trayIcon.Visible = false;
                 Application.Exit();
             };
 
-            trayMenu.Items.Add(showMenuItem);
-            trayMenu.Items.Add(new ToolStripSeparator());
-            trayMenu.Items.Add(exitMenuItem);
+            _trayMenu.Items.Add(showMenuItem);
+            _trayMenu.Items.Add(new ToolStripSeparator());
+            _trayMenu.Items.Add(exitMenuItem);
 
-            trayIcon.ContextMenuStrip = trayMenu;
-            trayIcon.DoubleClick += (s, e) => ShowFromTray();
+            _trayIcon.ContextMenuStrip = _trayMenu;
+            _trayIcon.DoubleClick += (s, e) => ShowFromTray();
         }
 
         private void ShowFromTray()
@@ -843,24 +876,24 @@ namespace koval_yp_codec
             this.Show();
             this.WindowState = FormWindowState.Normal;
             this.BringToFront();
-            isTrayMode = false;
+            _isTrayMode = false;
         }
 
-        // ---------- Обработка закрытия формы (BUG-010) ----------
+        // ---------- Обработка закрытия формы ----------
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing && !isTrayMode)
+            if (e.CloseReason == CloseReason.UserClosing && !_isTrayMode)
             {
                 // Сворачиваем в трей вместо закрытия
                 e.Cancel = true;
                 this.Hide();
-                trayIcon.ShowBalloonTip(1000, "Змеиный кодек",
+                _trayIcon.ShowBalloonTip(1000, "Змеиный кодек",
                                          "Приложение свёрнуто в системный трей",
                                          ToolTipIcon.Info);
             }
         }
 
-        // ---------- Горячая клавиша (BUG-007) ----------
+        // ---------- Горячая клавиша (ИСПРАВЛЕНО) ----------
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
@@ -879,7 +912,7 @@ namespace koval_yp_codec
                         // Показываем уведомление, если приложение свёрнуто
                         if (this.WindowState == FormWindowState.Minimized || !this.Visible)
                         {
-                            trayIcon.ShowBalloonTip(1000, "Быстрое шифрование",
+                            _trayIcon.ShowBalloonTip(1000, "Быстрое шифрование",
                                                      "Текст в буфере обмена зашифрован ROT13",
                                                      ToolTipIcon.Info);
                         }

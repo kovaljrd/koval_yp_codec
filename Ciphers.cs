@@ -2,7 +2,6 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace koval_yp_codec
 {
@@ -84,16 +83,22 @@ namespace koval_yp_codec
         }
 
         /// <summary>
-        /// ROT-n для всех печатных символов
+        /// ROT-n для всех печатных символов (коды ASCII 32-126)
         /// </summary>
+        /// <param name="input">Входной текст</param>
+        /// <param name="shift">Величина сдвига</param>
+        /// <param name="encrypt">true - шифрование, false - дешифрование</param>
+        /// <returns>Преобразованный текст</returns>
         public static string Rot(string input, int shift, bool encrypt)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
             int direction = encrypt ? 1 : -1;
-            int start = 32;
-            int end = 126;
-            int range = end - start + 1;
+            int start = 32;  // пробел
+            int end = 126;   // тильда ~
+            int range = end - start + 1; // 95 символов
+
+            // Корректируем сдвиг
             int effectiveShift = (shift * direction) % range;
             if (effectiveShift < 0) effectiveShift += range;
 
@@ -102,6 +107,8 @@ namespace koval_yp_codec
             foreach (char c in input)
             {
                 int asciiCode = (int)c;
+
+                // Обрабатываем только печатные ASCII символы
                 if (asciiCode >= start && asciiCode <= end)
                 {
                     int newCode = ((asciiCode - start + effectiveShift) % range) + start;
@@ -109,6 +116,7 @@ namespace koval_yp_codec
                 }
                 else
                 {
+                    // Символы вне диапазона (например, русские буквы) оставляем без изменений
                     result.Append(c);
                 }
             }
@@ -151,7 +159,7 @@ namespace koval_yp_codec
         };
 
         /// <summary>
-        /// Азбука Морзе с проверкой формата (BUG-001)
+        /// Азбука Морзе с проверкой формата
         /// </summary>
         public static string MorseEncode(string input)
         {
@@ -181,7 +189,7 @@ namespace koval_yp_codec
         }
 
         /// <summary>
-        /// Дешифрование азбуки Морзе с проверкой формата (BUG-001)
+        /// Дешифрование азбуки Морзе с проверкой формата
         /// </summary>
         public static string MorseDecode(string input)
         {
@@ -232,7 +240,7 @@ namespace koval_yp_codec
         }
 
         /// <summary>
-        /// Дешифрование двоичного кода с проверкой формата (BUG-002)
+        /// Дешифрование двоичного кода с проверкой формата
         /// </summary>
         public static string BinaryDecode(string input)
         {
