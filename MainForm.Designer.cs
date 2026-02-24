@@ -29,7 +29,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1280, 720);
             this.MinimumSize = new System.Drawing.Size(854, 481);
-            this.MaximumSize = new System.Drawing.Size(1920, 1080);
             this.Name = "MainForm";
             this.Text = "Змеиный кодек — Главное меню";
             this.ResumeLayout(false);

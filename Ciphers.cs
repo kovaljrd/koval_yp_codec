@@ -6,6 +6,16 @@ using System.Collections.Generic;
 namespace koval_yp_codec
 {
     /// <summary>
+    /// Режим обработки раскладки клавиатуры
+    /// </summary>
+    public enum KeyboardLayoutMode
+    {
+        Auto,       // Автоматическое определение
+        Cyrillic,   // Только кириллица
+        Latin       // Только латиница
+    }
+
+    /// <summary>
     /// Модуль, содержащий реализацию всех алгоритмов шифрования и кодирования
     /// </summary>
     public static class Ciphers
@@ -18,65 +28,131 @@ namespace koval_yp_codec
         private const string RussianLowercase = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
         private const string RussianUppercase = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 
+        // Таблица транслитерации для русских букв (кириллица -> латиница)
+        private static readonly Dictionary<char, char> TranslitMap = new Dictionary<char, char>
+        {
+            {'А', 'A'}, {'Б', 'B'}, {'В', 'V'}, {'Г', 'G'}, {'Д', 'D'},
+            {'Е', 'E'}, {'Ё', 'E'}, {'Ж', 'Z'}, {'З', 'Z'}, {'И', 'I'},
+            {'Й', 'I'}, {'К', 'K'}, {'Л', 'L'}, {'М', 'M'}, {'Н', 'N'},
+            {'О', 'O'}, {'П', 'P'}, {'Р', 'R'}, {'С', 'S'}, {'Т', 'T'},
+            {'У', 'U'}, {'Ф', 'F'}, {'Х', 'H'}, {'Ц', 'C'}, {'Ч', 'C'},
+            {'Ш', 'S'}, {'Щ', 'S'}, {'Ъ', '\''}, {'Ы', 'Y'}, {'Ь', '\''},
+            {'Э', 'E'}, {'Ю', 'U'}, {'Я', 'Y'},
+            {'а', 'a'}, {'б', 'b'}, {'в', 'v'}, {'г', 'g'}, {'д', 'd'},
+            {'е', 'e'}, {'ё', 'e'}, {'ж', 'z'}, {'з', 'z'}, {'и', 'i'},
+            {'й', 'i'}, {'к', 'k'}, {'л', 'l'}, {'м', 'm'}, {'н', 'n'},
+            {'о', 'o'}, {'п', 'p'}, {'р', 'r'}, {'с', 's'}, {'т', 't'},
+            {'у', 'u'}, {'ф', 'f'}, {'х', 'h'}, {'ц', 'c'}, {'ч', 'c'},
+            {'ш', 's'}, {'щ', 's'}, {'ъ', '\''}, {'ы', 'y'}, {'ь', '\''},
+            {'э', 'e'}, {'ю', 'u'}, {'я', 'y'}
+        };
+
+        // Таблица обратной транслитерации (латиница -> кириллица)
+        private static readonly Dictionary<char, char> ReverseTranslitMap = new Dictionary<char, char>
+        {
+            {'A', 'А'}, {'B', 'Б'}, {'V', 'В'}, {'G', 'Г'}, {'D', 'Д'},
+            {'E', 'Е'}, {'Z', 'З'}, {'I', 'И'}, {'K', 'К'}, {'L', 'Л'},
+            {'M', 'М'}, {'N', 'Н'}, {'O', 'О'}, {'P', 'П'}, {'R', 'Р'},
+            {'S', 'С'}, {'T', 'Т'}, {'U', 'У'}, {'F', 'Ф'}, {'H', 'Х'},
+            {'C', 'Ц'}, {'Y', 'Ы'}, {'J', 'Й'}, {'Q', 'Я'}, {'W', 'В'},
+            {'X', 'К'}, {'a', 'а'}, {'b', 'б'}, {'v', 'в'}, {'g', 'г'},
+            {'d', 'д'}, {'e', 'е'}, {'z', 'з'}, {'i', 'и'}, {'k', 'к'},
+            {'l', 'л'}, {'m', 'м'}, {'n', 'н'}, {'o', 'о'}, {'p', 'п'},
+            {'r', 'р'}, {'s', 'с'}, {'t', 'т'}, {'u', 'у'}, {'f', 'ф'},
+            {'h', 'х'}, {'c', 'ц'}, {'y', 'ы'}, {'j', 'й'}, {'q', 'я'},
+            {'w', 'в'}, {'x', 'к'}
+        };
+
         /// <summary>
-        /// Шифр Цезаря с поддержкой русского и английского
+        /// Вспомогательный метод для обработки латинских символов в шифре Цезаря
         /// </summary>
-        public static string Caesar(string input, int shift, bool encrypt)
+        private static char ProcessLatinChar(char c, int shift, int direction)
+        {
+            if (c >= 'a' && c <= 'z')
+            {
+                int index = c - 'a';
+                int newIndex = (index + shift * direction) % 26;
+                if (newIndex < 0) newIndex += 26;
+                return (char)('a' + newIndex);
+            }
+            else if (c >= 'A' && c <= 'Z')
+            {
+                int index = c - 'A';
+                int newIndex = (index + shift * direction) % 26;
+                if (newIndex < 0) newIndex += 26;
+                return (char)('A' + newIndex);
+            }
+            return c;
+        }
+
+        /// <summary>
+        /// Вспомогательный метод для обработки русских символов в шифре Цезаря
+        /// </summary>
+        private static char ProcessCyrillicChar(char c, int shift, int direction)
+        {
+            if (c >= 'а' && c <= 'я')
+            {
+                int index = c - 'а';
+                int newIndex = (index + shift * direction) % 32;
+                if (newIndex < 0) newIndex += 32;
+                return (char)('а' + newIndex);
+            }
+            else if (c >= 'А' && c <= 'Я')
+            {
+                int index = c - 'А';
+                int newIndex = (index + shift * direction) % 32;
+                if (newIndex < 0) newIndex += 32;
+                return (char)('А' + newIndex);
+            }
+            else if (c == 'ё')
+            {
+                return 'ё';
+            }
+            else if (c == 'Ё')
+            {
+                return 'Ё';
+            }
+            return c;
+        }
+
+        /// <summary>
+        /// Шифр Цезаря с поддержкой русского и английского и выбором раскладки
+        /// </summary>
+        public static string Caesar(string input, int shift, bool encrypt, KeyboardLayoutMode layoutMode = KeyboardLayoutMode.Auto)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
             int direction = encrypt ? 1 : -1;
-            int effectiveShift = (shift * direction) % 32;
-            if (effectiveShift < 0) effectiveShift += 32;
-
             StringBuilder result = new StringBuilder();
 
             foreach (char c in input)
             {
-                // Английские строчные
-                if (c >= 'a' && c <= 'z')
+                // Определяем, к какому алфавиту относится символ
+                bool isLatin = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+                bool isCyrillic = (c >= 'а' && c <= 'я') || (c >= 'А' && c <= 'Я') || c == 'ё' || c == 'Ё';
+
+                // Применяем правила в зависимости от выбранного режима
+                if (layoutMode == KeyboardLayoutMode.Latin && isCyrillic)
                 {
-                    int index = c - 'a';
-                    int newIndex = (index + effectiveShift) % 26;
-                    if (newIndex < 0) newIndex += 26;
-                    result.Append((char)('a' + newIndex));
+                    // Если выбран латинский режим, а символ русский - транслитерируем
+                    char latinChar = TranslitMap.ContainsKey(c) ? TranslitMap[c] : c;
+                    result.Append(ProcessLatinChar(latinChar, shift, direction));
                 }
-                // Английские заглавные
-                else if (c >= 'A' && c <= 'Z')
+                else if (layoutMode == KeyboardLayoutMode.Cyrillic && isLatin)
                 {
-                    int index = c - 'A';
-                    int newIndex = (index + effectiveShift) % 26;
-                    if (newIndex < 0) newIndex += 26;
-                    result.Append((char)('A' + newIndex));
-                }
-                // Русские строчные
-                else if (c >= 'а' && c <= 'я')
-                {
-                    int index = c - 'а';
-                    int newIndex = (index + effectiveShift) % 32;
-                    if (newIndex < 0) newIndex += 32;
-                    result.Append((char)('а' + newIndex));
-                }
-                // Русские заглавные
-                else if (c >= 'А' && c <= 'Я')
-                {
-                    int index = c - 'А';
-                    int newIndex = (index + effectiveShift) % 32;
-                    if (newIndex < 0) newIndex += 32;
-                    result.Append((char)('А' + newIndex));
-                }
-                // Ё и ё обрабатываем отдельно
-                else if (c == 'ё')
-                {
-                    result.Append('ё');
-                }
-                else if (c == 'Ё')
-                {
-                    result.Append('Ё');
+                    // Если выбран русский режим, а символ латинский - обратная транслитерация
+                    char cyrillicChar = ReverseTranslitMap.ContainsKey(c) ? ReverseTranslitMap[c] : c;
+                    result.Append(ProcessCyrillicChar(cyrillicChar, shift, direction));
                 }
                 else
                 {
-                    result.Append(c);
+                    // Автоматический режим или символ соответствует выбранной раскладке
+                    if (isLatin)
+                        result.Append(ProcessLatinChar(c, shift, direction));
+                    else if (isCyrillic)
+                        result.Append(ProcessCyrillicChar(c, shift, direction));
+                    else
+                        result.Append(c);
                 }
             }
             return result.ToString();
@@ -85,11 +161,7 @@ namespace koval_yp_codec
         /// <summary>
         /// ROT-n для всех печатных символов (коды ASCII 32-126)
         /// </summary>
-        /// <param name="input">Входной текст</param>
-        /// <param name="shift">Величина сдвига</param>
-        /// <param name="encrypt">true - шифрование, false - дешифрование</param>
-        /// <returns>Преобразованный текст</returns>
-        public static string Rot(string input, int shift, bool encrypt)
+        public static string Rot(string input, int shift, bool encrypt, KeyboardLayoutMode layoutMode = KeyboardLayoutMode.Auto)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
@@ -98,7 +170,6 @@ namespace koval_yp_codec
             int end = 126;   // тильда ~
             int range = end - start + 1; // 95 символов
 
-            // Корректируем сдвиг
             int effectiveShift = (shift * direction) % range;
             if (effectiveShift < 0) effectiveShift += range;
 
@@ -116,8 +187,30 @@ namespace koval_yp_codec
                 }
                 else
                 {
-                    // Символы вне диапазона (например, русские буквы) оставляем без изменений
-                    result.Append(c);
+                    // Для не-ASCII символов применяем логику раскладки
+                    bool isLatin = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+                    bool isCyrillic = (c >= 'а' && c <= 'я') || (c >= 'А' && c <= 'Я') || c == 'ё' || c == 'Ё';
+
+                    if (layoutMode == KeyboardLayoutMode.Latin && isCyrillic)
+                    {
+                        // Транслитерация для ROT-n (применяем ROT к транслитерированному символу)
+                        char latinChar = TranslitMap.ContainsKey(c) ? TranslitMap[c] : c;
+                        int latinCode = (int)latinChar;
+                        if (latinCode >= start && latinCode <= end)
+                        {
+                            int newCode = ((latinCode - start + effectiveShift) % range) + start;
+                            result.Append((char)newCode);
+                        }
+                        else
+                        {
+                            result.Append(latinChar);
+                        }
+                    }
+                    else
+                    {
+                        // В остальных случаях оставляем без изменений
+                        result.Append(c);
+                    }
                 }
             }
             return result.ToString();
@@ -139,29 +232,10 @@ namespace koval_yp_codec
             {'!', "-.-.--"}, {'@', ".--.-."}
         };
 
-        // Таблица транслитерации для русских букв
-        private static readonly Dictionary<char, char> TranslitMap = new Dictionary<char, char>
-        {
-            {'А', 'A'}, {'Б', 'B'}, {'В', 'V'}, {'Г', 'G'}, {'Д', 'D'},
-            {'Е', 'E'}, {'Ё', 'E'}, {'Ж', 'Z'}, {'З', 'Z'}, {'И', 'I'},
-            {'Й', 'I'}, {'К', 'K'}, {'Л', 'L'}, {'М', 'M'}, {'Н', 'N'},
-            {'О', 'O'}, {'П', 'P'}, {'Р', 'R'}, {'С', 'S'}, {'Т', 'T'},
-            {'У', 'U'}, {'Ф', 'F'}, {'Х', 'H'}, {'Ц', 'C'}, {'Ч', 'C'},
-            {'Ш', 'S'}, {'Щ', 'S'}, {'Ъ', '\''}, {'Ы', 'Y'}, {'Ь', '\''},
-            {'Э', 'E'}, {'Ю', 'U'}, {'Я', 'Y'},
-            {'а', 'a'}, {'б', 'b'}, {'в', 'v'}, {'г', 'g'}, {'д', 'd'},
-            {'е', 'e'}, {'ё', 'e'}, {'ж', 'z'}, {'з', 'z'}, {'и', 'i'},
-            {'й', 'i'}, {'к', 'k'}, {'л', 'l'}, {'м', 'm'}, {'н', 'n'},
-            {'о', 'o'}, {'п', 'p'}, {'р', 'r'}, {'с', 's'}, {'т', 't'},
-            {'у', 'u'}, {'ф', 'f'}, {'х', 'h'}, {'ц', 'c'}, {'ч', 'c'},
-            {'ш', 's'}, {'щ', 's'}, {'ъ', '\''}, {'ы', 'y'}, {'ь', '\''},
-            {'э', 'e'}, {'ю', 'u'}, {'я', 'y'}
-        };
-
         /// <summary>
-        /// Азбука Морзе с проверкой формата
+        /// Азбука Морзе с поддержкой выбора раскладки
         /// </summary>
-        public static string MorseEncode(string input)
+        public static string MorseEncode(string input, KeyboardLayoutMode layoutMode = KeyboardLayoutMode.Auto)
         {
             if (string.IsNullOrEmpty(input)) return "";
 
@@ -169,16 +243,25 @@ namespace koval_yp_codec
 
             foreach (char c in input)
             {
-                // Пробуем прямое соответствие
-                if (MorseMap.ContainsKey(char.ToUpperInvariant(c)))
+                bool isCyrillic = (c >= 'а' && c <= 'я') || (c >= 'А' && c <= 'Я') || c == 'ё' || c == 'Ё';
+                char processedChar = c;
+
+                // Применяем транслитерацию если нужно
+                if (layoutMode == KeyboardLayoutMode.Latin && isCyrillic)
                 {
-                    result.Append(MorseMap[char.ToUpperInvariant(c)] + " ");
+                    processedChar = TranslitMap.ContainsKey(c) ? TranslitMap[c] : c;
                 }
-                // Транслитерация русских букв
-                else if (TranslitMap.ContainsKey(c))
+                else if (layoutMode == KeyboardLayoutMode.Cyrillic && !isCyrillic && (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z'))
                 {
-                    char latin = TranslitMap[c];
-                    result.Append(MorseMap[char.ToUpperInvariant(latin)] + " ");
+                    processedChar = ReverseTranslitMap.ContainsKey(c) ? ReverseTranslitMap[c] : c;
+                }
+
+                char upperChar = char.ToUpperInvariant(processedChar);
+
+                // Пробуем прямое соответствие
+                if (MorseMap.ContainsKey(upperChar))
+                {
+                    result.Append(MorseMap[upperChar] + " ");
                 }
                 else
                 {
@@ -266,23 +349,34 @@ namespace koval_yp_codec
         }
 
         /// <summary>
-        /// A1Z26 (A=1, B=2, ...)
+        /// A1Z26 с поддержкой выбора раскладки
         /// </summary>
-        public static string A1Z26Encode(string input)
+        public static string A1Z26Encode(string input, KeyboardLayoutMode layoutMode = KeyboardLayoutMode.Auto)
         {
             if (string.IsNullOrEmpty(input)) return "";
 
             var result = new List<string>();
-            foreach (char c in input.ToUpperInvariant())
+
+            foreach (char c in input)
             {
-                if (c >= 'A' && c <= 'Z')
+                bool isCyrillic = (c >= 'а' && c <= 'я') || (c >= 'А' && c <= 'Я') || c == 'ё' || c == 'Ё';
+                char processedChar = c;
+
+                // Применяем транслитерацию если нужно
+                if (layoutMode == KeyboardLayoutMode.Latin && isCyrillic)
                 {
-                    result.Add((c - 'A' + 1).ToString());
+                    processedChar = TranslitMap.ContainsKey(c) ? TranslitMap[c] : c;
                 }
-                else if (TranslitMap.ContainsKey(c))
+                else if (layoutMode == KeyboardLayoutMode.Cyrillic && !isCyrillic && (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z'))
                 {
-                    char latin = TranslitMap[c];
-                    result.Add((char.ToUpperInvariant(latin) - 'A' + 1).ToString());
+                    processedChar = ReverseTranslitMap.ContainsKey(c) ? ReverseTranslitMap[c] : c;
+                }
+
+                char upperChar = char.ToUpperInvariant(processedChar);
+
+                if (upperChar >= 'A' && upperChar <= 'Z')
+                {
+                    result.Add((upperChar - 'A' + 1).ToString());
                 }
                 else
                 {
@@ -343,14 +437,14 @@ namespace koval_yp_codec
         }
 
         /// <summary>
-        /// Base32
+        /// Base32 (исправленная версия)
         /// </summary>
         public static string Base32Encode(string input)
         {
             if (string.IsNullOrEmpty(input)) return "";
 
             byte[] bytes = Encoding.UTF8.GetBytes(input);
-            return Base32.ToBase32String(bytes);
+            return Base32Converter.ToBase32String(bytes);
         }
 
         public static string Base32Decode(string input)
@@ -362,7 +456,7 @@ namespace koval_yp_codec
 
             try
             {
-                byte[] bytes = Base32.FromBase32String(input);
+                byte[] bytes = Base32Converter.FromBase32String(input);
                 return Encoding.UTF8.GetString(bytes);
             }
             catch (FormatException)
@@ -402,82 +496,100 @@ namespace koval_yp_codec
                                           "Ожидаются числа от 0 до 255, разделённые пробелами.");
             }
         }
+    }
 
-        // Вспомогательный класс для Base32
-        private static class Base32
+    /// <summary>
+    /// Исправленный конвертер для Base32 (RFC 4648)
+    /// </summary>
+    public static class Base32Converter
+    {
+        private const string Base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+        /// <summary>
+        /// Преобразование массива байтов в Base32 строку
+        /// </summary>
+        public static string ToBase32String(byte[] input)
         {
-            private const string Base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            if (input == null || input.Length == 0)
+                return string.Empty;
 
-            public static string ToBase32String(byte[] input)
+            int bitCount = input.Length * 8;
+            int resultLength = (bitCount + 4) / 5; // Округление вверх
+            StringBuilder result = new StringBuilder(resultLength);
+
+            int buffer = 0;
+            int bitsRemaining = 0;
+            int index = 0;
+
+            while (index < input.Length || bitsRemaining > 0)
             {
-                if (input == null || input.Length == 0) return "";
-
-                int charCount = (int)Math.Ceiling(input.Length * 8 / 5.0);
-                var result = new StringBuilder(charCount);
-                byte nextChar = 0, bitsRemaining = 5;
-                int index = 0;
-
-                while (index < input.Length)
+                if (bitsRemaining < 5)
                 {
-                    nextChar = (byte)(nextChar | (input[index] >> (8 - bitsRemaining)));
-                    result.Append(Base32Chars[nextChar]);
-
-                    if (bitsRemaining < 4)
+                    if (index < input.Length)
                     {
-                        nextChar = (byte)((input[index] >> (3 - bitsRemaining)) & 31);
-                        result.Append(Base32Chars[nextChar]);
-                        bitsRemaining += 5;
-                    }
-                    bitsRemaining -= 3;
-                    nextChar = (byte)((input[index] << bitsRemaining) & 31);
-                    index++;
-                }
-
-                if (bitsRemaining > 0)
-                {
-                    result.Append(Base32Chars[nextChar]);
-                }
-                return result.ToString();
-            }
-
-            public static byte[] FromBase32String(string base32)
-            {
-                if (string.IsNullOrEmpty(base32)) return new byte[0];
-
-                base32 = base32.Trim().ToUpperInvariant();
-
-                // Проверка символов
-                foreach (char c in base32)
-                {
-                    if (!Base32Chars.Contains(c))
-                        throw new FormatException($"Недопустимый символ '{c}' в Base32 строке");
-                }
-
-                int byteCount = base32.Length * 5 / 8;
-                byte[] result = new byte[byteCount];
-                int buffer = 0;
-                int bitsLeft = 8;
-                int resultIndex = 0;
-
-                foreach (char c in base32)
-                {
-                    int value = Base32Chars.IndexOf(c);
-                    if (bitsLeft > 5)
-                    {
-                        buffer = (buffer << 5) | value;
-                        bitsLeft -= 5;
+                        buffer = (buffer << 8) | input[index++];
+                        bitsRemaining += 8;
                     }
                     else
                     {
-                        buffer = (buffer << 5) | value;
-                        int shift = bitsLeft + 5 - 8;
-                        result[resultIndex++] = (byte)((buffer >> shift) & 0xFF);
-                        buffer &= (1 << shift) - 1;
-                        bitsLeft = 8 - shift;
+                        buffer <<= 5 - bitsRemaining;
+                        bitsRemaining = 5;
                     }
                 }
-                return result;
+
+                int value = (buffer >> (bitsRemaining - 5)) & 0x1F;
+                result.Append(Base32Chars[value]);
+                bitsRemaining -= 5;
             }
+
+            // Добавление padding (длина результата должна быть кратна 8)
+            int paddingCount = (8 - (result.Length % 8)) % 8;
+            result.Append('=', paddingCount);
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Преобразование Base32 строки в массив байтов
+        /// </summary>
+        public static byte[] FromBase32String(string base32)
+        {
+            if (string.IsNullOrEmpty(base32))
+                return new byte[0];
+
+            // Удаление символов padding
+            string cleanInput = base32.TrimEnd('=').ToUpperInvariant();
+
+            // Проверка символов
+            foreach (char c in cleanInput)
+            {
+                if (!Base32Chars.Contains(c))
+                    throw new FormatException($"Недопустимый символ '{c}' в Base32 строке");
+            }
+
+            int bitCount = cleanInput.Length * 5;
+            int byteCount = bitCount / 8;
+            byte[] result = new byte[byteCount];
+
+            int buffer = 0;
+            int bitsRemaining = 0;
+            int resultIndex = 0;
+
+            foreach (char c in cleanInput)
+            {
+                int value = Base32Chars.IndexOf(c);
+                buffer = (buffer << 5) | value;
+                bitsRemaining += 5;
+
+                if (bitsRemaining >= 8)
+                {
+                    result[resultIndex++] = (byte)((buffer >> (bitsRemaining - 8)) & 0xFF);
+                    bitsRemaining -= 8;
+                    buffer &= (1 << bitsRemaining) - 1;
+                }
+            }
+
+            return result;
         }
     }
 }

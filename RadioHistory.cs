@@ -53,7 +53,7 @@ namespace koval_yp_codec
         {
             var entry = new RadioEntry
             {
-                Frequency = _random.NextDouble() * 10 + 140, // 140-150 MHz
+                Frequency = Math.Round(_random.NextDouble() * 10 + 140, 2), // 140-150 MHz
                 OperationType = operationType,
                 CipherName = cipherName,
                 Preview = text.Length > 30 ? text.Substring(0, 30) + "..." : text,
@@ -68,6 +68,60 @@ namespace koval_yp_codec
         /// Получение всех записей истории
         /// </summary>
         public static IReadOnlyList<RadioEntry> GetAll() => _history.AsReadOnly();
+
+        /// <summary>
+        /// Очистка всей истории операций
+        /// </summary>
+        public static void ClearHistory()
+        {
+            _history.Clear();
+            Save();
+            Logger.Log("HISTORY_CLEAR", "История операций очищена");
+        }
+
+        /// <summary>
+        /// Удаление конкретной записи по индексу
+        /// </summary>
+        /// <param name="index">Индекс записи для удаления</param>
+        /// <returns>True если удаление успешно, иначе False</returns>
+        public static bool RemoveEntry(int index)
+        {
+            if (index >= 0 && index < _history.Count)
+            {
+                var entry = _history[index];
+                _history.RemoveAt(index);
+                Save();
+                Logger.Log("HISTORY_REMOVE", $"Удалена запись: {entry.OperationType} | {entry.CipherName} | {entry.Preview}");
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Экспорт истории в файл
+        /// </summary>
+        /// <param name="filePath">Путь для сохранения</param>
+        /// <returns>True если экспорт успешен, иначе False</returns>
+        public static bool ExportToFile(string filePath)
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(_history, Formatting.Indented);
+                File.WriteAllText(filePath, json);
+                Logger.Log("HISTORY_EXPORT", $"История экспортирована в {filePath}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("HISTORY_EXPORT_ERROR", ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Получение количества записей в истории
+        /// </summary>
+        public static int GetEntryCount() => _history.Count;
 
         /// <summary>
         /// Загрузка истории из JSON-файла
@@ -86,8 +140,9 @@ namespace koval_yp_codec
                     _history.AddRange(loaded);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Log("HISTORY_LOAD_ERROR", ex.Message);
                 // При ошибке загрузки оставляем пустую историю
             }
         }
@@ -102,9 +157,9 @@ namespace koval_yp_codec
                 string json = JsonConvert.SerializeObject(_history, Formatting.Indented);
                 File.WriteAllText(FilePath, json);
             }
-            catch
+            catch (Exception ex)
             {
-                // Игнорируем ошибки сохранения
+                Logger.Log("HISTORY_SAVE_ERROR", ex.Message);
             }
         }
     }
